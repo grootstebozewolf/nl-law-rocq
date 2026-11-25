@@ -1,0 +1,9 @@
+-Q theories NLLaw
+theories/Params2026.v
+theories/Box1.v
+theories/Kortingen.v
+theories/Combined.v
+theories/Marginal.v
+theories/AOW.v
+theories/Examples.v
+theories/Assumptions.v

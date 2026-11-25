@@ -1,0 +1,34 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rocq:
+    runs-on: ubuntu-latest
+    container:
+      image: rocq/rocq-prover:9.2
+      # run as root so actions/checkout can write to the workspace
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate Rocq
+        run: |
+          if ! command -v rocq >/dev/null 2>&1; then
+            for d in /home/*/.opam/*/bin /root/.opam/*/bin; do
+              [ -x "$d/rocq" ] && echo "$d" >> "$GITHUB_PATH" && break
+            done
+          fi
+      - name: Rocq version
+        run: rocq --version
+      - name: Build
+        run: make
+      - name: Check for Admitted / axioms
+        run: make check-admits
+      - name: Axiom audit (Print Assumptions)
+        run: |
+          rocq compile -Q theories NLLaw theories/Assumptions.v | tee assumptions.txt
+          test "$(grep -c 'Closed under the global context' assumptions.txt)" -ge 28
